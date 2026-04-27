@@ -6,6 +6,7 @@ abstract class SupabaseAuthDataSource {
   Future<sb.User> signIn({required String email, required String password});
   Future<sb.User> signUp({required String email, required String password});
   Future<void> signOut();
+  Future<void> resetPassword(String email);
   sb.User? get currentUser;
   Stream<sb.AuthState> authStateChanges();
 }
@@ -71,6 +72,17 @@ class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
   Future<void> signOut() async {
     try {
       await _client.auth.signOut();
+    } catch (e) {
+      throw core.AuthException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> resetPassword(String email) async {
+    try {
+      await _client.auth.resetPasswordForEmail(email);
+    } on sb.AuthException catch (e) {
+      throw core.AuthException(e.message);
     } catch (e) {
       throw core.AuthException(e.toString());
     }

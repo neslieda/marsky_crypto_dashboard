@@ -1,32 +1,39 @@
-import 'dart:developer' as developer;
-
 import 'package:dio/dio.dart';
+import 'package:logger/logger.dart';
 
 class LoggingInterceptor extends Interceptor {
+  LoggingInterceptor()
+      : _log = Logger(
+          printer: PrettyPrinter(
+            methodCount: 0,
+            errorMethodCount: 5,
+            colors: true,
+            printEmojis: true,
+            dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
+          ),
+          level: Level.info,
+        );
+
+  final Logger _log;
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    developer.log(
-      '→ ${options.method} ${options.uri}',
-      name: 'http',
-    );
+    _log.i('→ ${options.method} ${options.uri}');
     super.onRequest(options, handler);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    developer.log(
-      '← ${response.statusCode} ${response.requestOptions.uri}',
-      name: 'http',
-    );
+    _log.d('← ${response.statusCode} ${response.requestOptions.uri}');
     super.onResponse(response, handler);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    developer.log(
-      '✗ ${err.response?.statusCode ?? '-'} ${err.requestOptions.uri} ${err.message ?? ''}',
-      name: 'http',
-      error: err,
+    _log.e(
+      '✗ ${err.response?.statusCode ?? '-'} ${err.requestOptions.uri}',
+      error: err.message,
+      stackTrace: err.stackTrace,
     );
     super.onError(err, handler);
   }

@@ -6,25 +6,27 @@ backed by a **Hive** local database for per-user favorites.
 
 ## Features
 
-- **Email/password authentication** (Supabase) with persistent sessions and
-  reactive auth-aware routing (`go_router`).
+- **Email/password authentication** (Supabase) with persistent sessions,
+  reactive auth-aware routing (`go_router`), and **password reset** flow.
 - **Home tab**: paginated list of coins with infinite scroll, pull-to-refresh,
-  and sort options:
-  - Price
-  - Market Cap
-  - 24h Volume
-  - 24h Change
-  - Listed Date
+  client-side **search bar**, and sort options (Market Cap / Price / 24h Volume /
+  24h Change / Listed Date, asc ↔ desc).
 - **Favorites tab**: per-user favorites stored locally in Hive, surviving app
-  restarts and isolated by `userId` (different accounts see different lists).
-- **iOS-style modal bottom sheet** for coin detail with:
-  - Name, rank, symbol, current price and 24h change
-  - High / low (derived from history)
-  - Market cap and 24h volume
-  - **Line chart** (`fl_chart`) with selectable time period (1H / 24H / 7D / 30D / 1Y)
-- **Logout confirmation** via Cupertino dialog, accessible from a fixed icon in
-  the top-right corner of the main shell.
+  restarts and isolated by `userId`. Pull-to-refresh supported.
+- **iOS-style modal bottom sheet** for coin detail with description, all-time
+  high, website link, high/low/market cap stats and an `fl_chart` line chart
+  with selectable time period (1H / 24H / 7D / 30D / 1Y).
+- **Hero animation** between coin tile and detail sheet icons.
+- **Shimmer skeletons** for coins-list loading state.
+- **Dark / light mode toggle** persisted via `SharedPreferences`.
+- **Localization** (TR / EN) generated through `flutter_localizations` + ARB.
+- **Offline mode**: GET responses cached for 5 minutes via
+  `dio_cache_interceptor` (Hive store).
+- **Structured logging** via `logger` package (Dio request/response/error).
+- **Logout confirmation** via Cupertino dialog from the main shell.
 - Friendly error / empty / loading states throughout.
+- **CI**: GitHub Actions runs `flutter analyze` + `flutter test --coverage` on
+  every push (`.github/workflows/ci.yml`).
 
 ## Architecture
 
@@ -144,8 +146,25 @@ flutter analyze
 
 ## Out of scope
 
-- Cross-device favorite sync (favorites tracked locally per user only)
-- Candlestick chart (line chart used)
-- Push notifications / price alerts
-- Localization (English only)
-- Social login (email + password only)
+- Cross-device favorite sync (local-only; Supabase schema documented below for
+  a future milestone).
+- Candlestick chart (line chart used).
+- Push notifications / price alerts.
+- Social login (email + password only).
+
+### Future: Supabase favorites cloud sync
+
+```sql
+create table favorites (
+  user_id  uuid references auth.users on delete cascade,
+  uuid     text not null,
+  name     text not null,
+  symbol   text not null,
+  icon_url text,
+  added_at timestamptz default now(),
+  primary key (user_id, uuid)
+);
+alter table favorites enable row level security;
+create policy "own favorites" on favorites
+  for all using (auth.uid() = user_id);
+```

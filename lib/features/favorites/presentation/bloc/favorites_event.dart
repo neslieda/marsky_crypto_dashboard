@@ -17,6 +17,10 @@ class FavoritesUserCleared extends FavoritesEvent {
   const FavoritesUserCleared();
 }
 
+class FavoritesRefreshed extends FavoritesEvent {
+  const FavoritesRefreshed();
+}
+
 class FavoritesToggled extends FavoritesEvent {
   final FavoriteCoin coin;
   const FavoritesToggled(this.coin);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -61,6 +62,7 @@ class _RegisterPageState extends State<RegisterPage> {
           },
           builder: (context, state) {
             final loading = state.status == AuthStatus.authenticating;
+            final l = AppLocalizations.of(context);
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
                 horizontal: 24,
@@ -72,14 +74,14 @@ class _RegisterPageState extends State<RegisterPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Create your account',
+                      l.createAccount,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'It only takes a moment',
+                      l.createAccountSubtitle,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -89,14 +91,14 @@ class _RegisterPageState extends State<RegisterPage> {
                       controller: _emailCtrl,
                       enabled: !loading,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                      decoration: InputDecoration(
+                        labelText: l.email,
+                        prefixIcon: const Icon(Icons.email_outlined),
                       ),
                       validator: (v) {
                         final s = v?.trim() ?? '';
-                        if (s.isEmpty) return 'Email is required';
-                        if (!s.contains('@')) return 'Invalid email';
+                        if (s.isEmpty) return l.emailRequired;
+                        if (!s.contains('@')) return l.invalidEmail;
                         return null;
                       },
                     ),
@@ -106,7 +108,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       enabled: !loading,
                       obscureText: _obscure,
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: l.password,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(_obscure
@@ -118,7 +120,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       validator: (v) {
                         if (v == null || v.length < 6) {
-                          return 'Min 6 characters';
+                          return l.passwordMin;
                         }
                         return null;
                       },
@@ -128,13 +130,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       controller: _confirmCtrl,
                       enabled: !loading,
                       obscureText: _obscure,
-                      decoration: const InputDecoration(
-                        labelText: 'Confirm password',
-                        prefixIcon: Icon(Icons.lock_outline),
+                      decoration: InputDecoration(
+                        labelText: l.confirmPassword,
+                        prefixIcon: const Icon(Icons.lock_outline),
                       ),
                       validator: (v) {
                         if (v != _passwordCtrl.text) {
-                          return 'Passwords do not match';
+                          return l.passwordsDontMatch;
                         }
                         return null;
                       },
@@ -148,7 +150,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               width: 22,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Create account'),
+                          : Text(l.signUp),
                     ),
                   ],
                 ),

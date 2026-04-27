@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 
 class LoginPage extends StatefulWidget {
@@ -37,6 +38,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = AppLocalizations.of(context);
     return Scaffold(
       body: SafeArea(
         child: BlocConsumer<AuthBloc, AuthState>(
@@ -71,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Welcome back',
+                      l.welcomeBack,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
@@ -79,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Sign in to track your favorite coins',
+                      l.signInSubtitle,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
@@ -91,14 +93,14 @@ class _LoginPageState extends State<LoginPage> {
                       enabled: !loading,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                      decoration: InputDecoration(
+                        labelText: l.email,
+                        prefixIcon: const Icon(Icons.email_outlined),
                       ),
                       validator: (v) {
                         final s = v?.trim() ?? '';
-                        if (s.isEmpty) return 'Email is required';
-                        if (!s.contains('@')) return 'Invalid email';
+                        if (s.isEmpty) return l.emailRequired;
+                        if (!s.contains('@')) return l.invalidEmail;
                         return null;
                       },
                     ),
@@ -109,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: _obscure,
                       autofillHints: const [AutofillHints.password],
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: l.password,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(_obscure
@@ -121,12 +123,21 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       validator: (v) {
                         if (v == null || v.length < 6) {
-                          return 'Password must be at least 6 chars';
+                          return l.passwordMin;
                         }
                         return null;
                       },
                     ),
-                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: loading
+                            ? null
+                            : () => context.push('/forgot-password'),
+                        child: Text(l.forgotPassword),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     FilledButton(
                       onPressed: loading ? null : _submit,
                       child: loading
@@ -135,14 +146,14 @@ class _LoginPageState extends State<LoginPage> {
                               width: 22,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Sign in'),
+                          : Text(l.signIn),
                     ),
                     const SizedBox(height: 16),
                     TextButton(
                       onPressed: loading
                           ? null
                           : () => context.push('/register'),
-                      child: const Text("Don't have an account? Sign up"),
+                      child: Text(l.noAccountYet),
                     ),
                   ],
                 ),

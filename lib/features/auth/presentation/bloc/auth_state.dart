@@ -1,6 +1,6 @@
 part of 'auth_bloc.dart';
 
-enum AuthStatus { unknown, unauthenticated, authenticating, authenticated, error }
+enum AuthStatus { unknown, unauthenticated, authenticating, authenticated, passwordResetSent, error }
 
 class AuthState extends Equatable {
   final AuthStatus status;
@@ -20,6 +20,8 @@ class AuthState extends Equatable {
       : this._(status: AuthStatus.authenticating);
   const AuthState.authenticated(AuthUser user)
       : this._(status: AuthStatus.authenticated, user: user);
+  const AuthState.passwordResetSent()
+      : this._(status: AuthStatus.passwordResetSent);
   const AuthState.error(String message)
       : this._(status: AuthStatus.error, errorMessage: message);
 

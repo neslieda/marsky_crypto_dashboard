@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:marsky_crypto_dashboard/core/error/failures.dart';
 import 'package:marsky_crypto_dashboard/features/auth/domain/entities/auth_user.dart';
 import 'package:marsky_crypto_dashboard/features/auth/domain/usecases/get_current_user.dart';
+import 'package:marsky_crypto_dashboard/features/auth/domain/usecases/reset_password.dart';
 import 'package:marsky_crypto_dashboard/features/auth/domain/usecases/sign_in.dart';
 import 'package:marsky_crypto_dashboard/features/auth/domain/usecases/sign_out.dart';
 import 'package:marsky_crypto_dashboard/features/auth/domain/usecases/sign_up.dart';
@@ -21,12 +22,15 @@ class _MockWatchAuthState extends Mock implements WatchAuthState {}
 
 class _MockGetCurrentUser extends Mock implements GetCurrentUser {}
 
+class _MockResetPassword extends Mock implements ResetPassword {}
+
 void main() {
   late _MockSignIn signIn;
   late _MockSignUp signUp;
   late _MockSignOut signOut;
   late _MockWatchAuthState watchAuthState;
   late _MockGetCurrentUser getCurrentUser;
+  late _MockResetPassword resetPassword;
 
   const user = AuthUser(id: 'u1', email: 'a@b.com');
 
@@ -36,6 +40,7 @@ void main() {
     signOut = _MockSignOut();
     watchAuthState = _MockWatchAuthState();
     getCurrentUser = _MockGetCurrentUser();
+    resetPassword = _MockResetPassword();
     when(() => watchAuthState()).thenAnswer((_) => const Stream.empty());
   });
 
@@ -45,6 +50,7 @@ void main() {
         signOut: signOut,
         watchAuthState: watchAuthState,
         getCurrentUser: getCurrentUser,
+        resetPassword: resetPassword,
       );
 
   test('initial state is unknown', () {

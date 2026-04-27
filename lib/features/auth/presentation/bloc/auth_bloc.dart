@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/auth_user.dart';
 import '../../domain/usecases/get_current_user.dart';
+import '../../domain/usecases/reset_password.dart';
 import '../../domain/usecases/sign_in.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up.dart';
@@ -19,6 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignOut signOut;
   final WatchAuthState watchAuthState;
   final GetCurrentUser getCurrentUser;
+  final ResetPassword resetPassword;
 
   StreamSubscription<AuthUser?>? _authSub;
 
@@ -28,11 +30,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.signOut,
     required this.watchAuthState,
     required this.getCurrentUser,
+    required this.resetPassword,
   }) : super(const AuthState.unknown()) {
     on<AuthStarted>(_onStarted);
     on<AuthSignInRequested>(_onSignInRequested);
     on<AuthSignUpRequested>(_onSignUpRequested);
     on<AuthSignOutRequested>(_onSignOutRequested);
+    on<AuthResetPasswordRequested>(_onResetPasswordRequested);
     on<_AuthUserChanged>(_onUserChanged);
   }
 
@@ -78,6 +82,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthState.error(failure.message)),
       (user) => emit(AuthState.authenticated(user)),
+    );
+  }
+
+  Future<void> _onResetPasswordRequested(
+    AuthResetPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthState.authenticating());
+    final result = await resetPassword(event.email);
+    result.fold(
+      (failure) => emit(AuthState.error(failure.message)),
+      (_) => emit(const AuthState.passwordResetSent()),
     );
   }
 

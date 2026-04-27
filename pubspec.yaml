@@ -64,7 +64,23 @@ dependencies:
   fl_chart: ^0.70.2
 
   # Internationalisation
-  intl: ^0.19.0
+  intl: ^0.20.2
+  flutter_localizations:
+    sdk: flutter
+
+  # UX
+  shimmer: ^3.0.0
+
+  # Logging
+  logger: ^2.4.0
+
+  # Settings persistence
+  shared_preferences: ^2.3.3
+
+  # HTTP cache (offline mode)
+  dio_cache_interceptor: ^3.5.0
+  dio_cache_interceptor_hive_store: ^4.0.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
@@ -74,16 +90,11 @@ dev_dependencies:
   mocktail: ^1.0.4
   bloc_test: ^10.0.0
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
-# The following section is specific to Flutter packages.
 flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+
+  generate: true
 
   assets:
     - .env

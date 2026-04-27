@@ -1,11 +1,15 @@
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../network/dio_client.dart';
+import '../network/http_cache.dart';
+import '../settings/settings_cubit.dart';
 import '../../features/auth/data/datasources/supabase_auth_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
+import '../../features/auth/domain/usecases/reset_password.dart';
 import '../../features/auth/domain/usecases/sign_in.dart';
 import '../../features/auth/domain/usecases/sign_out.dart';
 import '../../features/auth/domain/usecases/sign_up.dart';
@@ -25,10 +29,19 @@ import '../../features/favorites/domain/usecases/watch_favorites.dart';
 
 final GetIt sl = GetIt.instance;
 
-Future<void> configureDependencies() async {
+Future<void> configureDependencies({String? hiveCachePath}) async {
   // External
   sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
-  sl.registerLazySingleton<DioClient>(() => DioClient.coinRanking());
+
+  final cacheInterceptor = await HttpCache.build(hivePath: hiveCachePath);
+  sl.registerLazySingleton<DioClient>(
+    () => DioClient.coinRanking(cacheInterceptor: cacheInterceptor),
+  );
+
+  // Settings
+  final prefs = await SharedPreferences.getInstance();
+  sl.registerLazySingleton<SharedPreferences>(() => prefs);
+  sl.registerLazySingleton<SettingsCubit>(() => SettingsCubit(sl()));
 
   // ---------------- Auth ----------------
   sl.registerLazySingleton<SupabaseAuthDataSource>(
@@ -42,6 +55,7 @@ Future<void> configureDependencies() async {
   sl.registerFactory(() => SignOut(sl()));
   sl.registerFactory(() => GetCurrentUser(sl()));
   sl.registerFactory(() => WatchAuthState(sl()));
+  sl.registerFactory(() => ResetPassword(sl()));
   sl.registerFactory(
     () => AuthBloc(
       signIn: sl(),
@@ -49,6 +63,7 @@ Future<void> configureDependencies() async {
       signOut: sl(),
       watchAuthState: sl(),
       getCurrentUser: sl(),
+      resetPassword: sl(),
     ),
   );
 

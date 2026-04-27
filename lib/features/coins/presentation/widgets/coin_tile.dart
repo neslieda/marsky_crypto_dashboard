@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/formatters.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/coin.dart';
 
 class CoinTile extends StatelessWidget {
@@ -42,7 +43,7 @@ class CoinTile extends StatelessWidget {
                 ),
               ),
             ),
-            _CoinIcon(url: coin.iconUrl, symbol: coin.symbol),
+            _CoinIcon(url: coin.iconUrl, symbol: coin.symbol, heroTag: 'coin-icon-${coin.uuid}'),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -95,7 +96,9 @@ class CoinTile extends StatelessWidget {
                     : theme.colorScheme.onSurfaceVariant,
               ),
               onPressed: onFavoriteToggle,
-              tooltip: isFavorite ? 'Remove favorite' : 'Add favorite',
+              tooltip: isFavorite
+                  ? AppLocalizations.of(context).removeFavorite
+                  : AppLocalizations.of(context).addFavorite,
             ),
           ],
         ),
@@ -107,7 +110,12 @@ class CoinTile extends StatelessWidget {
 class _CoinIcon extends StatelessWidget {
   final String? url;
   final String symbol;
-  const _CoinIcon({required this.url, required this.symbol});
+  final String heroTag;
+  const _CoinIcon({
+    required this.url,
+    required this.symbol,
+    required this.heroTag,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -119,20 +127,28 @@ class _CoinIcon extends StatelessWidget {
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
     );
-    if (url == null || url!.isEmpty) return fallback;
-    if (url!.endsWith('.svg')) {
-      // SVG support omitted; fallback for SVG.
-      return fallback;
+    Widget child;
+    if (url == null || url!.isEmpty || url!.endsWith('.svg')) {
+      child = fallback;
+    } else {
+      child = ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: url!,
+          width: 36,
+          height: 36,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => fallback,
+          errorWidget: (_, __, ___) => fallback,
+        ),
+      );
     }
-    return ClipOval(
-      child: CachedNetworkImage(
-        imageUrl: url!,
-        width: 36,
-        height: 36,
-        fit: BoxFit.cover,
-        placeholder: (_, __) => fallback,
-        errorWidget: (_, __, ___) => fallback,
+    return Hero(
+      tag: heroTag,
+      flightShuttleBuilder: (_, __, ___, ____, _____) => Material(
+        type: MaterialType.transparency,
+        child: child,
       ),
+      child: child,
     );
   }
 }

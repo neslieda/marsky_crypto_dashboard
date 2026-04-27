@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/shell/presentation/pages/main_shell_page.dart';
@@ -17,8 +18,10 @@ class AppRouter {
     redirect: (context, state) {
       final auth = _authBloc.state;
       final loggedIn = auth.isAuthenticated;
-      final loggingIn = state.matchedLocation == '/login' ||
-          state.matchedLocation == '/register';
+      final loc = state.matchedLocation;
+      final loggingIn = loc == '/login' ||
+          loc == '/register' ||
+          loc == '/forgot-password';
       if (auth.status == AuthStatus.unknown) return null;
       if (!loggedIn && !loggingIn) return '/login';
       if (loggedIn && loggingIn) return '/';
@@ -36,6 +39,10 @@ class AppRouter {
       GoRoute(
         path: '/register',
         builder: (_, __) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (_, __) => const ForgotPasswordPage(),
       ),
     ],
   );

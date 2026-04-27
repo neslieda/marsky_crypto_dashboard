@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/error_view.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/coin_sort.dart';
 import '../bloc/coin_detail_bloc.dart';
 import 'price_line_chart.dart';
@@ -38,6 +40,25 @@ class CoinDetailSheet extends StatelessWidget {
 class _CoinDetailSheetView extends StatelessWidget {
   const _CoinDetailSheetView();
 
+  static String _stripHtml(String input) {
+    return input
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
+        .trim();
+  }
+
+  Color? _parseColor(String? hex) {
+    if (hex == null || hex.isEmpty) return null;
+    final cleaned = hex.replaceAll('#', '');
+    if (cleaned.length != 6) return null;
+    final value = int.tryParse(cleaned, radix: 16);
+    if (value == null) return null;
+    return Color(0xFF000000 | value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
@@ -64,6 +85,7 @@ class _CoinDetailSheetView extends StatelessWidget {
             final detail = state.detail!;
             final coin = detail.coin;
             final theme = Theme.of(context);
+            final l = AppLocalizations.of(context);
             final changePositive = (coin.change ?? 0) >= 0;
             final changeColor = changePositive
                 ? const Color(0xFF16A34A)
@@ -75,7 +97,11 @@ class _CoinDetailSheetView extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _Icon(url: coin.iconUrl, symbol: coin.symbol),
+                    _Icon(
+                      url: coin.iconUrl,
+                      symbol: coin.symbol,
+                      heroTag: 'coin-icon-${coin.uuid}',
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -107,7 +133,7 @@ class _CoinDetailSheetView extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
-                                    'Rank #${coin.rank}',
+                                    l.rank(coin.rank!),
                                     style: theme.textTheme.bodySmall,
                                   ),
                                 ),
@@ -158,6 +184,36 @@ class _CoinDetailSheetView extends StatelessWidget {
                   marketCap: coin.marketCap,
                   volume: coin.volume24h,
                 ),
+                if (detail.allTimeHigh != null) ...[
+                  const SizedBox(height: 12),
+                  _StatTile(
+                    label: l.allTimeHigh,
+                    value: Formatters.price(detail.allTimeHigh),
+                  ),
+                ],
+                if (detail.websiteUrl != null &&
+                    detail.websiteUrl!.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _WebsiteRow(url: detail.websiteUrl!),
+                ],
+                if (detail.description != null &&
+                    detail.description!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    l.description,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _stripHtml(detail.description!),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
               ],
             );
           },
@@ -165,21 +221,17 @@ class _CoinDetailSheetView extends StatelessWidget {
       },
     );
   }
-
-  Color? _parseColor(String? hex) {
-    if (hex == null || hex.isEmpty) return null;
-    final cleaned = hex.replaceAll('#', '');
-    if (cleaned.length != 6) return null;
-    final value = int.tryParse(cleaned, radix: 16);
-    if (value == null) return null;
-    return Color(0xFF000000 | value);
-  }
 }
 
 class _Icon extends StatelessWidget {
   final String? url;
   final String symbol;
-  const _Icon({required this.url, required this.symbol});
+  final String heroTag;
+  const _Icon({
+    required this.url,
+    required this.symbol,
+    required this.heroTag,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -191,15 +243,81 @@ class _Icon extends StatelessWidget {
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
     );
-    if (url == null || url!.isEmpty || url!.endsWith('.svg')) return fallback;
-    return ClipOval(
-      child: CachedNetworkImage(
-        imageUrl: url!,
-        width: 44,
-        height: 44,
-        fit: BoxFit.cover,
-        placeholder: (_, __) => fallback,
-        errorWidget: (_, __, ___) => fallback,
+    Widget child;
+    if (url == null || url!.isEmpty || url!.endsWith('.svg')) {
+      child = fallback;
+    } else {
+      child = ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: url!,
+          width: 44,
+          height: 44,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => fallback,
+          errorWidget: (_, __, ___) => fallback,
+        ),
+      );
+    }
+    return Hero(
+      tag: heroTag,
+      flightShuttleBuilder: (_, __, ___, ____, _____) => Material(
+        type: MaterialType.transparency,
+        child: child,
+      ),
+      child: child,
+    );
+  }
+}
+
+class _WebsiteRow extends StatelessWidget {
+  final String url;
+  const _WebsiteRow({required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l = AppLocalizations.of(context);
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () async {
+        await Clipboard.setData(ClipboardData(text: url));
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$url copied')),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Row(
+          children: [
+            Icon(Icons.link_rounded, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                url,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              l.website,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.copy_rounded,
+              size: 18,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -246,14 +364,15 @@ class _StatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Wrap(
       spacing: 12,
       runSpacing: 12,
       children: [
-        _StatTile(label: 'High', value: Formatters.price(high)),
-        _StatTile(label: 'Low', value: Formatters.price(low)),
-        _StatTile(label: 'Market Cap', value: Formatters.compactPrice(marketCap)),
-        _StatTile(label: '24h Volume', value: Formatters.compactPrice(volume)),
+        _StatTile(label: l.high, value: Formatters.price(high)),
+        _StatTile(label: l.low, value: Formatters.price(low)),
+        _StatTile(label: l.marketCap, value: Formatters.compactPrice(marketCap)),
+        _StatTile(label: l.volume24h, value: Formatters.compactPrice(volume)),
       ],
     );
   }

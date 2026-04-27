@@ -25,6 +25,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   }) : super(const FavoritesState()) {
     on<FavoritesUserChanged>(_onUserChanged);
     on<FavoritesUserCleared>(_onUserCleared);
+    on<FavoritesRefreshed>(_onRefreshed);
     on<_FavoritesUpdated>(_onUpdated);
     on<FavoritesToggled>(_onToggled);
   }
@@ -58,6 +59,21 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     _sub = null;
     await repository.close();
     emit(const FavoritesState());
+  }
+
+  Future<void> _onRefreshed(
+    FavoritesRefreshed event,
+    Emitter<FavoritesState> emit,
+  ) async {
+    final result = await repository.getAll();
+    result.fold(
+      (failure) => emit(state.copyWith(errorMessage: failure.message)),
+      (list) => emit(state.copyWith(
+        status: FavoritesStatus.success,
+        favorites: list,
+        errorMessage: null,
+      )),
+    );
   }
 
   void _onUpdated(_FavoritesUpdated event, Emitter<FavoritesState> emit) {

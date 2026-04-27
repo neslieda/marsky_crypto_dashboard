@@ -8,7 +8,7 @@ class DioClient {
 
   final Dio dio;
 
-  factory DioClient.coinRanking() {
+  factory DioClient.coinRanking({Interceptor? cacheInterceptor}) {
     final dio = Dio(
       BaseOptions(
         baseUrl: AppEnv.coinRankingBaseUrl,
@@ -20,6 +20,9 @@ class DioClient {
         },
       ),
     );
+    if (cacheInterceptor != null) {
+      dio.interceptors.add(cacheInterceptor);
+    }
     dio.interceptors.add(LoggingInterceptor());
     return DioClient._(dio);
   }
