@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 
 /// Reference currency that the CoinRanking API should return prices in.
+/// Note: CoinRanking free plan only supports USD as reference currency.
+/// EUR / TRY require a paid plan.
 enum AppCurrency {
-  usd(uuid: 'yhjMzLPhuIDl', symbol: r'$', code: 'USD'),
-  eur(uuid: '5k-_VTxqtCEI', symbol: '€', code: 'EUR'),
-  tryLira(uuid: 'ZqkR7BF6-qJB', symbol: '₺', code: 'TRY');
+  usd(uuid: 'yhjMzLPhuIDl', symbol: r'$', code: 'USD');
 
   const AppCurrency({
     required this.uuid,

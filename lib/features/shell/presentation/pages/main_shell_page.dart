@@ -129,10 +129,6 @@ class _MainShellPageState extends State<MainShellPage> {
                     segments: const [
                       ButtonSegment(
                           value: AppCurrency.usd, label: Text('USD')),
-                      ButtonSegment(
-                          value: AppCurrency.eur, label: Text('EUR')),
-                      ButtonSegment(
-                          value: AppCurrency.tryLira, label: Text('TRY')),
                     ],
                     selected: {state.currency},
                     onSelectionChanged: (s) => settings.setCurrency(s.first),
