@@ -11,6 +11,8 @@ class AppEnv {
   static String get coinRankingApiKey =>
       dotenv.env['COINRANKING_API_KEY'] ?? '';
 
+  static String get openAiApiKey => dotenv.env['OPENAI_API_KEY'] ?? '';
+
   static bool get isConfigured =>
       supabaseUrl.isNotEmpty &&
       supabaseAnonKey.isNotEmpty &&

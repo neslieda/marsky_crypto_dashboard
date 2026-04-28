@@ -7,6 +7,8 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../l10n/generated/app_localizations.dart';
+import '../../../ai/presentation/cubit/ai_cubit.dart';
+import '../../../ai/presentation/widgets/ai_insight_card.dart';
 import '../../domain/entities/coin_sort.dart';
 import '../bloc/coin_detail_bloc.dart';
 import 'price_line_chart.dart';
@@ -27,11 +29,16 @@ class CoinDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => CoinDetailBloc(
-        getCoinDetail: sl(),
-        getCoinHistory: sl(),
-      )..add(CoinDetailOpened(uuid)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => CoinDetailBloc(
+            getCoinDetail: sl(),
+            getCoinHistory: sl(),
+          )..add(CoinDetailOpened(uuid)),
+        ),
+        BlocProvider(create: (_) => sl<AiCubit>()),
+      ],
       child: const _CoinDetailSheetView(),
     );
   }
@@ -184,6 +191,21 @@ class _CoinDetailSheetView extends StatelessWidget {
                   marketCap: coin.marketCap,
                   volume: coin.volume24h,
                 ),
+                const SizedBox(height: 16),
+                Builder(builder: (ctx) {
+                  final lang = Localizations.localeOf(ctx).languageCode;
+                  return AiInsightCard(
+                    title: lang == 'tr' ? 'AI Analiz' : 'AI Insight',
+                    icon: Icons.auto_awesome_rounded,
+                    generateLabel:
+                        lang == 'tr' ? 'Analiz et' : 'Analyze',
+                    onGenerate: () => ctx.read<AiCubit>().analyzeCoin(
+                          coin: detail,
+                          history: state.history,
+                          languageCode: lang,
+                        ),
+                  );
+                }),
                 if (detail.allTimeHigh != null) ...[
                   const SizedBox(height: 12),
                   _StatTile(

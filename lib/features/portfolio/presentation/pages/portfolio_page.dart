@@ -2,11 +2,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/empty_view.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../l10n/generated/app_localizations.dart';
+import '../../../ai/presentation/cubit/ai_cubit.dart';
+import '../../../ai/presentation/widgets/ai_insight_card.dart';
 import '../../../coins/domain/entities/coin.dart';
+import '../../../coins/domain/entities/coin_detail.dart';
 import '../../../coins/presentation/bloc/coins_list_bloc.dart';
 import '../../../coins/presentation/widgets/coin_detail_sheet.dart';
 import '../../domain/entities/portfolio_holding.dart';
@@ -19,7 +23,16 @@ class PortfolioPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l.portfolio)),
+      appBar: AppBar(
+        title: Text(l.portfolio),
+        actions: [
+          IconButton(
+            tooltip: 'AI Advisor',
+            icon: const Icon(Icons.auto_awesome_rounded),
+            onPressed: () => _openAiAdvisor(context),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openAddHoldingSheet(context),
         icon: const Icon(Icons.add),
@@ -101,6 +114,74 @@ class PortfolioPage extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  Future<void> _openAiAdvisor(BuildContext context) async {
+    final state = context.read<PortfolioBloc>().state;
+    final lang = Localizations.localeOf(context).languageCode;
+    final coins = <String, CoinDetail>{
+      for (final h in state.holdings)
+        h.uuid: CoinDetail(
+          coin: Coin(
+            uuid: h.uuid,
+            name: h.name,
+            symbol: h.symbol,
+            iconUrl: h.iconUrl,
+            price: state.prices[h.uuid],
+          ),
+        ),
+    };
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (sheetCtx) {
+        return BlocProvider(
+          create: (_) => sl<AiCubit>()
+            ..advisePortfolio(
+              holdings: state.holdings,
+              coins: coins,
+              languageCode: lang,
+            ),
+          child: DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: 0.7,
+            maxChildSize: 0.95,
+            builder: (_, controller) => ListView(
+              controller: controller,
+              padding: const EdgeInsets.only(bottom: 24),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                  child: Text(
+                    lang == 'tr'
+                        ? 'AI Portföy Danışmanı'
+                        : 'AI Portfolio Advisor',
+                    style: Theme.of(sheetCtx).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
+                Builder(builder: (ctx) {
+                  return AiInsightCard(
+                    title: lang == 'tr' ? 'Analiz' : 'Analysis',
+                    icon: Icons.insights_rounded,
+                    generateLabel:
+                        lang == 'tr' ? 'Tekrar dene' : 'Retry',
+                    onGenerate: () => ctx.read<AiCubit>().advisePortfolio(
+                          holdings: state.holdings,
+                          coins: coins,
+                          languageCode: lang,
+                        ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

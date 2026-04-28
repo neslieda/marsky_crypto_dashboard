@@ -38,6 +38,10 @@ import '../../features/portfolio/data/datasources/portfolio_local_datasource.dar
 import '../../features/portfolio/data/repositories/portfolio_repository_impl.dart';
 import '../../features/portfolio/domain/repositories/portfolio_repository.dart';
 import '../../features/portfolio/presentation/bloc/portfolio_bloc.dart';
+import '../../features/ai/data/datasources/openai_datasource.dart';
+import '../../features/ai/data/repositories/ai_repository_impl.dart';
+import '../../features/ai/domain/repositories/ai_repository.dart';
+import '../../features/ai/presentation/cubit/ai_cubit.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -124,4 +128,9 @@ Future<void> configureDependencies({String? hiveCachePath}) async {
   sl.registerLazySingleton<NewsRemoteDataSource>(() => CryptoPanicDataSource());
   sl.registerLazySingleton<NewsRepository>(() => NewsRepositoryImpl(sl()));
   sl.registerLazySingleton<NewsBloc>(() => NewsBloc(repository: sl()));
+
+  // ---------------- AI ----------------
+  sl.registerLazySingleton<OpenAiDataSource>(() => OpenAiDataSourceImpl());
+  sl.registerLazySingleton<AiRepository>(() => AiRepositoryImpl(sl()));
+  sl.registerFactory(() => AiCubit(sl()));
 }
