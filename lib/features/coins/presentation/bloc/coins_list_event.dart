@@ -29,3 +29,10 @@ class CoinsListSortChanged extends CoinsListEvent {
   @override
   List<Object?> get props => [sortBy, direction];
 }
+
+class CoinsListSearchChanged extends CoinsListEvent {
+  final String query;
+  const CoinsListSearchChanged(this.query);
+  @override
+  List<Object?> get props => [query];
+}

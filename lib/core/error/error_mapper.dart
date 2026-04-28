@@ -36,6 +36,9 @@ AppException mapDioToException(DioException error) {
 /// Maps any [Object] (Exception/Error) to a [Failure].
 Failure mapExceptionToFailure(Object error) {
   if (error is NetworkException) return NetworkFailure(error.message);
+  if (error is EmailConfirmationException) {
+    return EmailConfirmationFailure(error.message);
+  }
   if (error is AuthException) return AuthFailure(error.message);
   if (error is ServerException) {
     return ServerFailure(error.message, statusCode: error.statusCode);

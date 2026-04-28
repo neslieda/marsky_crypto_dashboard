@@ -13,6 +13,7 @@ abstract class CoinsRemoteDataSource {
     required int offset,
     required CoinSortBy orderBy,
     required CoinSortDirection direction,
+    String? search,
   });
 
   Future<CoinDetailModel> getCoinDetail(String uuid);
@@ -33,6 +34,7 @@ class CoinsRemoteDataSourceImpl implements CoinsRemoteDataSource {
     required int offset,
     required CoinSortBy orderBy,
     required CoinSortDirection direction,
+    String? search,
   }) async {
     try {
       final res = await dio.get(
@@ -42,6 +44,7 @@ class CoinsRemoteDataSourceImpl implements CoinsRemoteDataSource {
           'offset': offset,
           'orderBy': orderBy.apiValue,
           'orderDirection': direction.apiValue,
+          if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
         },
       );
       final body = res.data as Map<String, dynamic>;

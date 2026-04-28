@@ -27,6 +27,11 @@ class AuthFailure extends Failure {
   const AuthFailure(super.message);
 }
 
+class EmailConfirmationFailure extends Failure {
+  const EmailConfirmationFailure(
+      [super.message = 'Please confirm your email to continue.']);
+}
+
 class CacheFailure extends Failure {
   const CacheFailure([super.message = 'Local storage error.']);
 }

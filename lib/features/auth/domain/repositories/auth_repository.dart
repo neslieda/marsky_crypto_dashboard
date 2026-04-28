@@ -18,6 +18,8 @@ abstract class AuthRepository {
 
   Future<Either<Failure, void>> resetPassword(String email);
 
+  Future<Either<Failure, void>> resendConfirmation(String email);
+
   AuthUser? get currentUser;
 
   Stream<AuthUser?> authStateChanges();

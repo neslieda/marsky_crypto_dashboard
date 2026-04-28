@@ -18,6 +18,7 @@ class CoinsListBloc extends Bloc<CoinsListEvent, CoinsListState> {
     on<CoinsListLoadMoreRequested>(_onLoadMoreRequested);
     on<CoinsListSortChanged>(_onSortChanged);
     on<CoinsListRefreshed>(_onRefreshed);
+    on<CoinsListSearchChanged>(_onSearchChanged);
   }
 
   Future<void> _onLoadRequested(
@@ -30,6 +31,7 @@ class CoinsListBloc extends Bloc<CoinsListEvent, CoinsListState> {
       offset: 0,
       orderBy: state.sortBy,
       direction: state.direction,
+      search: state.searchQuery.isEmpty ? null : state.searchQuery,
     );
     result.fold(
       (failure) => emit(
@@ -60,6 +62,7 @@ class CoinsListBloc extends Bloc<CoinsListEvent, CoinsListState> {
       offset: state.coins.length,
       orderBy: state.sortBy,
       direction: state.direction,
+      search: state.searchQuery.isEmpty ? null : state.searchQuery,
     );
     result.fold(
       (failure) => emit(
@@ -96,6 +99,20 @@ class CoinsListBloc extends Bloc<CoinsListEvent, CoinsListState> {
     CoinsListRefreshed event,
     Emitter<CoinsListState> emit,
   ) async {
+    add(const CoinsListLoadRequested());
+  }
+
+  Future<void> _onSearchChanged(
+    CoinsListSearchChanged event,
+    Emitter<CoinsListState> emit,
+  ) async {
+    final q = event.query.trim();
+    if (q == state.searchQuery) return;
+    emit(state.copyWith(
+      searchQuery: q,
+      coins: const [],
+      hasMore: true,
+    ));
     add(const CoinsListLoadRequested());
   }
 }

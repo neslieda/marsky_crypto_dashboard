@@ -39,6 +39,13 @@ class AuthResetPasswordRequested extends AuthEvent {
   List<Object?> get props => [email];
 }
 
+class AuthResendConfirmationRequested extends AuthEvent {
+  final String email;
+  const AuthResendConfirmationRequested(this.email);
+  @override
+  List<Object?> get props => [email];
+}
+
 class _AuthUserChanged extends AuthEvent {
   final AuthUser? user;
   const _AuthUserChanged(this.user);

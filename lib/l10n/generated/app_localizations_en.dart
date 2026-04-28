@@ -253,4 +253,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get change24h => '24h change';
+
+  @override
+  String get confirmEmailTitle => 'Confirm your email';
+
+  @override
+  String confirmEmailBody(String email) {
+    return 'We sent a verification link to $email. Please check your inbox and tap the link to activate your account.';
+  }
+
+  @override
+  String get resendConfirmation => 'Resend confirmation';
+
+  @override
+  String get backToSignIn => 'Back to sign in';
+
+  @override
+  String get confirmationResent => 'Confirmation email re-sent.';
 }

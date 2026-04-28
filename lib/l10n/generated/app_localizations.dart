@@ -577,6 +577,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'24h change'**
   String get change24h;
+
+  /// No description provided for @confirmEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your email'**
+  String get confirmEmailTitle;
+
+  /// No description provided for @confirmEmailBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification link to {email}. Please check your inbox and tap the link to activate your account.'**
+  String confirmEmailBody(String email);
+
+  /// No description provided for @resendConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend confirmation'**
+  String get resendConfirmation;
+
+  /// No description provided for @backToSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to sign in'**
+  String get backToSignIn;
+
+  /// No description provided for @confirmationResent.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmation email re-sent.'**
+  String get confirmationResent;
 }
 
 class _AppLocalizationsDelegate

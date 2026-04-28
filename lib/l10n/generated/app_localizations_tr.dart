@@ -254,4 +254,21 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get change24h => '24s değişim';
+
+  @override
+  String get confirmEmailTitle => 'E-postanı doğrula';
+
+  @override
+  String confirmEmailBody(String email) {
+    return '$email adresine bir doğrulama bağlantısı gönderdik. Hesabını etkinleştirmek için posta kutunu kontrol edip bağlantıya tıkla.';
+  }
+
+  @override
+  String get resendConfirmation => 'Doğrulama e-postasını yeniden gönder';
+
+  @override
+  String get backToSignIn => 'Girişe dön';
+
+  @override
+  String get confirmationResent => 'Doğrulama e-postası yeniden gönderildi.';
 }

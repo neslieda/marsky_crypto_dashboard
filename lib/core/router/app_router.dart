@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/pages/email_confirmation_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
@@ -22,7 +23,8 @@ class AppRouter {
       final loc = state.matchedLocation;
       final loggingIn = loc == '/login' ||
           loc == '/register' ||
-          loc == '/forgot-password';
+          loc == '/forgot-password' ||
+          loc.startsWith('/confirm-email');
       if (auth.status == AuthStatus.unknown) return null;
       if (!loggedIn && !loggingIn) return '/login';
       if (loggedIn && loggingIn) return '/';
@@ -44,6 +46,12 @@ class AppRouter {
       GoRoute(
         path: '/forgot-password',
         builder: (_, __) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: '/confirm-email',
+        builder: (_, state) => EmailConfirmationPage(
+          email: state.uri.queryParameters['email'] ?? '',
+        ),
       ),
       GoRoute(
         path: '/compare',

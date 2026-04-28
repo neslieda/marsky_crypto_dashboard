@@ -10,6 +10,7 @@ class CoinsListState extends Equatable {
   final CoinSortBy sortBy;
   final CoinSortDirection direction;
   final String? errorMessage;
+  final String searchQuery;
 
   const CoinsListState({
     this.status = CoinsListStatus.initial,
@@ -19,6 +20,7 @@ class CoinsListState extends Equatable {
     this.sortBy = CoinSortBy.marketCap,
     this.direction = CoinSortDirection.desc,
     this.errorMessage,
+    this.searchQuery = '',
   });
 
   CoinsListState copyWith({
@@ -29,6 +31,7 @@ class CoinsListState extends Equatable {
     CoinSortBy? sortBy,
     CoinSortDirection? direction,
     String? errorMessage,
+    String? searchQuery,
   }) {
     return CoinsListState(
       status: status ?? this.status,
@@ -38,6 +41,7 @@ class CoinsListState extends Equatable {
       sortBy: sortBy ?? this.sortBy,
       direction: direction ?? this.direction,
       errorMessage: errorMessage,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 
@@ -50,5 +54,6 @@ class CoinsListState extends Equatable {
         sortBy,
         direction,
         errorMessage,
+        searchQuery,
       ];
 }

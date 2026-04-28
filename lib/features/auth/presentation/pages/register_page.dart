@@ -51,7 +51,10 @@ class _RegisterPageState extends State<RegisterPage> {
         child: BlocConsumer<AuthBloc, AuthState>(
           listenWhen: (p, c) => p.status != c.status,
           listener: (context, state) {
-            if (state.status == AuthStatus.error &&
+            if (state.status == AuthStatus.emailConfirmationPending) {
+              context.go(
+                  '/confirm-email?email=${Uri.encodeQueryComponent(state.pendingEmail ?? _emailCtrl.text.trim())}');
+            } else if (state.status == AuthStatus.error &&
                 state.errorMessage != null) {
               ScaffoldMessenger.of(context)
                 ..hideCurrentSnackBar()

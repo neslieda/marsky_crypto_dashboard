@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/auth_user.dart';
 import '../../domain/usecases/get_current_user.dart';
+import '../../domain/usecases/resend_confirmation.dart';
 import '../../domain/usecases/reset_password.dart';
 import '../../domain/usecases/sign_in.dart';
 import '../../domain/usecases/sign_out.dart';
@@ -21,6 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final WatchAuthState watchAuthState;
   final GetCurrentUser getCurrentUser;
   final ResetPassword resetPassword;
+  final ResendConfirmation resendConfirmation;
 
   StreamSubscription<AuthUser?>? _authSub;
 
@@ -31,12 +34,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.watchAuthState,
     required this.getCurrentUser,
     required this.resetPassword,
+    required this.resendConfirmation,
   }) : super(const AuthState.unknown()) {
     on<AuthStarted>(_onStarted);
     on<AuthSignInRequested>(_onSignInRequested);
     on<AuthSignUpRequested>(_onSignUpRequested);
     on<AuthSignOutRequested>(_onSignOutRequested);
     on<AuthResetPasswordRequested>(_onResetPasswordRequested);
+    on<AuthResendConfirmationRequested>(_onResendConfirmation);
     on<_AuthUserChanged>(_onUserChanged);
   }
 
@@ -80,8 +85,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthState.authenticating());
     final result = await signUp(email: event.email, password: event.password);
     result.fold(
-      (failure) => emit(AuthState.error(failure.message)),
+      (failure) {
+        if (failure is EmailConfirmationFailure) {
+          emit(AuthState.emailConfirmationPending(event.email));
+        } else {
+          emit(AuthState.error(failure.message));
+        }
+      },
       (user) => emit(AuthState.authenticated(user)),
+    );
+  }
+
+  Future<void> _onResendConfirmation(
+    AuthResendConfirmationRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final result = await resendConfirmation(event.email);
+    result.fold(
+      (failure) => emit(AuthState.error(failure.message)),
+      (_) => emit(AuthState.emailConfirmationResent(event.email)),
     );
   }
 

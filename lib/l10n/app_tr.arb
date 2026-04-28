@@ -81,5 +81,11 @@
   "copyLink": "Bağlantı kopyalandı",
   "compareHint": "Karşılaştırmak için iki coin seç",
   "price": "Fiyat",
-  "change24h": "24s değişim"
+  "change24h": "24s değişim",
+  "confirmEmailTitle": "E-postanı doğrula",
+  "confirmEmailBody": "{email} adresine bir doğrulama bağlantısı gönderdik. Hesabını etkinleştirmek için posta kutunu kontrol edip bağlantıya tıkla.",
+  "@confirmEmailBody": { "placeholders": { "email": { "type": "String" } } },
+  "resendConfirmation": "Doğrulama e-postasını yeniden gönder",
+  "backToSignIn": "Girişe dön",
+  "confirmationResent": "Doğrulama e-postası yeniden gönderildi."
 }

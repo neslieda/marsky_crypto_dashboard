@@ -10,6 +10,7 @@ import '../../features/auth/data/datasources/supabase_auth_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
+import '../../features/auth/domain/usecases/resend_confirmation.dart';
 import '../../features/auth/domain/usecases/reset_password.dart';
 import '../../features/auth/domain/usecases/sign_in.dart';
 import '../../features/auth/domain/usecases/sign_out.dart';
@@ -24,6 +25,7 @@ import '../../features/coins/domain/usecases/get_coin_history.dart';
 import '../../features/coins/domain/usecases/get_coins_paginated.dart';
 import '../../features/coins/presentation/bloc/coins_list_bloc.dart';
 import '../../features/favorites/data/datasources/favorites_local_datasource.dart';
+import '../../features/favorites/data/datasources/favorites_remote_datasource.dart';
 import '../../features/favorites/data/repositories/favorites_repository_impl.dart';
 import '../../features/favorites/domain/repositories/favorites_repository.dart';
 import '../../features/favorites/domain/usecases/toggle_favorite.dart';
@@ -67,6 +69,7 @@ Future<void> configureDependencies({String? hiveCachePath}) async {
   sl.registerFactory(() => GetCurrentUser(sl()));
   sl.registerFactory(() => WatchAuthState(sl()));
   sl.registerFactory(() => ResetPassword(sl()));
+  sl.registerFactory(() => ResendConfirmation(sl()));
   sl.registerFactory(
     () => AuthBloc(
       signIn: sl(),
@@ -75,6 +78,7 @@ Future<void> configureDependencies({String? hiveCachePath}) async {
       watchAuthState: sl(),
       getCurrentUser: sl(),
       resetPassword: sl(),
+      resendConfirmation: sl(),
     ),
   );
 
@@ -96,8 +100,11 @@ Future<void> configureDependencies({String? hiveCachePath}) async {
   sl.registerLazySingleton<FavoritesLocalDataSource>(
     () => FavoritesLocalDataSourceImpl(),
   );
+  sl.registerLazySingleton<FavoritesRemoteDataSource>(
+    () => SupabaseFavoritesDataSource(sl<SupabaseClient>()),
+  );
   sl.registerLazySingleton<FavoritesRepository>(
-    () => FavoritesRepositoryImpl(sl()),
+    () => FavoritesRepositoryImpl(sl(), sl<FavoritesRemoteDataSource>()),
   );
   sl.registerFactory(() => ToggleFavorite(sl()));
   sl.registerFactory(() => WatchFavorites(sl()));

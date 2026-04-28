@@ -11,6 +11,7 @@ abstract class CoinsRepository {
     required int offset,
     required CoinSortBy orderBy,
     required CoinSortDirection orderDirection,
+    String? search,
   });
 
   Future<Either<Failure, CoinDetail>> getCoinDetail(String uuid);

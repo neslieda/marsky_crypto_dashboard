@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/formatters.dart';
@@ -67,6 +68,8 @@ class CoinTile extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(width: 8),
+            _Sparkline(values: coin.sparkline, color: changeColor),
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -149,6 +152,48 @@ class _CoinIcon extends StatelessWidget {
         child: child,
       ),
       child: child,
+    );
+  }
+}
+
+class _Sparkline extends StatelessWidget {
+  final List<double?> values;
+  final Color color;
+  const _Sparkline({required this.values, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final pts = <FlSpot>[];
+    for (var i = 0; i < values.length; i++) {
+      final v = values[i];
+      if (v == null) continue;
+      pts.add(FlSpot(i.toDouble(), v));
+    }
+    if (pts.length < 2) return const SizedBox(width: 56, height: 28);
+    return SizedBox(
+      width: 56,
+      height: 28,
+      child: LineChart(
+        LineChartData(
+          lineTouchData: const LineTouchData(enabled: false),
+          gridData: const FlGridData(show: false),
+          titlesData: const FlTitlesData(show: false),
+          borderData: FlBorderData(show: false),
+          lineBarsData: [
+            LineChartBarData(
+              spots: pts,
+              isCurved: true,
+              barWidth: 1.6,
+              color: color,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(
+                show: true,
+                color: color.withValues(alpha: 0.12),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

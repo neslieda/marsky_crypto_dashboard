@@ -81,5 +81,11 @@
   "copyLink": "Link copied",
   "compareHint": "Pick two coins to compare",
   "price": "Price",
-  "change24h": "24h change"
+  "change24h": "24h change",
+  "confirmEmailTitle": "Confirm your email",
+  "confirmEmailBody": "We sent a verification link to {email}. Please check your inbox and tap the link to activate your account.",
+  "@confirmEmailBody": { "placeholders": { "email": { "type": "String" } } },
+  "resendConfirmation": "Resend confirmation",
+  "backToSignIn": "Back to sign in",
+  "confirmationResent": "Confirmation email re-sent."
 }

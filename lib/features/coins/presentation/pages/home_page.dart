@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -37,23 +39,31 @@ class _HomeView extends StatefulWidget {
 class _HomeViewState extends State<_HomeView> {
   final _scroll = ScrollController();
   final _searchCtrl = TextEditingController();
-  String _query = '';
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
-    _searchCtrl.addListener(() {
-      if (_query != _searchCtrl.text) {
-        setState(() => _query = _searchCtrl.text);
-      }
+    _searchCtrl.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      if (!mounted) return;
+      context
+          .read<CoinsListBloc>()
+          .add(CoinsListSearchChanged(_searchCtrl.text));
     });
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _scroll.removeListener(_onScroll);
     _scroll.dispose();
+    _searchCtrl.removeListener(_onSearchChanged);
     _searchCtrl.dispose();
     super.dispose();
   }
@@ -105,67 +115,51 @@ class _HomeViewState extends State<_HomeView> {
                 .add(const CoinsListLoadRequested()),
           );
         } else if (state.coins.isEmpty) {
-          body = EmptyView(message: l.noCoins);
-        } else {
-          final filtered = _query.trim().isEmpty
-              ? state.coins
-              : state.coins.where((c) {
-                  final q = _query.toLowerCase();
-                  return c.name.toLowerCase().contains(q) ||
-                      c.symbol.toLowerCase().contains(q);
-                }).toList();
           body = RefreshIndicator(
-            onRefresh: () async {
-              context
-                  .read<CoinsListBloc>()
-                  .add(const CoinsListRefreshed());
-              await context
-                  .read<CoinsListBloc>()
-                  .stream
-                  .firstWhere((s) => s.status != CoinsListStatus.loading);
-            },
-            child: filtered.isEmpty
-                ? ListView(
-                    children: [
-                      const SizedBox(height: 80),
-                      EmptyView(
-                        icon: Icons.search_off_rounded,
-                        message: l.noCoins,
-                      ),
-                    ],
-                  )
-                : ListView.separated(
-                    controller: _scroll,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: filtered.length +
-                        (state.hasMore && _query.isEmpty ? 1 : 0),
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      if (index >= filtered.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                      final coin = filtered[index];
-                      return BlocBuilder<FavoritesBloc, FavoritesState>(
-                        buildWhen: (p, c) =>
-                            _isFav(p.favorites, coin.uuid) !=
-                            _isFav(c.favorites, coin.uuid),
-                        builder: (context, favState) {
-                          final isFav = _isFav(favState.favorites, coin.uuid);
-                          return CoinTile(
-                            coin: coin,
-                            isFavorite: isFav,
-                            onTap: () =>
-                                CoinDetailSheet.show(context, coin.uuid),
-                            onFavoriteToggle: () =>
-                                _toggleFavorite(context, coin),
-                          );
-                        },
-                      );
-                    },
-                  ),
+            onRefresh: () => _refresh(context),
+            child: ListView(
+              children: [
+                const SizedBox(height: 80),
+                EmptyView(
+                  icon: state.searchQuery.isEmpty
+                      ? Icons.inbox_rounded
+                      : Icons.search_off_rounded,
+                  message: l.noCoins,
+                ),
+              ],
+            ),
+          );
+        } else {
+          body = RefreshIndicator(
+            onRefresh: () => _refresh(context),
+            child: ListView.separated(
+              controller: _scroll,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: state.coins.length + (state.hasMore ? 1 : 0),
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                if (index >= state.coins.length) {
+                  return const CoinTileSkeleton();
+                }
+                final coin = state.coins[index];
+                return BlocBuilder<FavoritesBloc, FavoritesState>(
+                  buildWhen: (p, c) =>
+                      _isFav(p.favorites, coin.uuid) !=
+                      _isFav(c.favorites, coin.uuid),
+                  builder: (context, favState) {
+                    final isFav = _isFav(favState.favorites, coin.uuid);
+                    return CoinTile(
+                      coin: coin,
+                      isFavorite: isFav,
+                      onTap: () =>
+                          CoinDetailSheet.show(context, coin.uuid),
+                      onFavoriteToggle: () =>
+                          _toggleFavorite(context, coin),
+                    );
+                  },
+                );
+              },
+            ),
           );
         }
 
@@ -194,7 +188,7 @@ class _HomeViewState extends State<_HomeView> {
                   decoration: InputDecoration(
                     hintText: l.search,
                     prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _query.isEmpty
+                    suffixIcon: _searchCtrl.text.isEmpty
                         ? null
                         : IconButton(
                             icon: const Icon(Icons.close),
@@ -214,6 +208,14 @@ class _HomeViewState extends State<_HomeView> {
 
   bool _isFav(List<FavoriteCoin> list, String uuid) =>
       list.any((f) => f.uuid == uuid);
+
+  Future<void> _refresh(BuildContext context) async {
+    final bloc = context.read<CoinsListBloc>();
+    bloc.add(const CoinsListRefreshed());
+    await bloc.stream.firstWhere(
+      (s) => s.status != CoinsListStatus.loading,
+    );
+  }
 
   void _toggleFavorite(BuildContext context, Coin coin) {
     context.read<FavoritesBloc>().add(

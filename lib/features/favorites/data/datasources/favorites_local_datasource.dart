@@ -13,6 +13,9 @@ abstract class FavoritesLocalDataSource {
   Stream<List<FavoriteCoinHive>> watchAll();
   Future<bool> toggle(FavoriteCoinHive coin);
   Future<void> updateCategory(String uuid, String? category);
+  Future<void> upsertEntity(FavoriteCoinHive coin);
+  Future<void> removeByUuid(String uuid);
+  Future<bool> toggleIfMissing(FavoriteCoinHive coin);
 }
 
 class FavoritesLocalDataSourceImpl implements FavoritesLocalDataSource {
@@ -84,5 +87,25 @@ class FavoritesLocalDataSourceImpl implements FavoritesLocalDataSource {
       category: category,
     );
     await box.put(uuid, updated);
+  }
+
+  @override
+  Future<void> upsertEntity(FavoriteCoinHive coin) async {
+    final box = _requireBox();
+    await box.put(coin.uuid, coin);
+  }
+
+  @override
+  Future<void> removeByUuid(String uuid) async {
+    final box = _requireBox();
+    await box.delete(uuid);
+  }
+
+  @override
+  Future<bool> toggleIfMissing(FavoriteCoinHive coin) async {
+    final box = _requireBox();
+    if (box.containsKey(coin.uuid)) return false;
+    await box.put(coin.uuid, coin);
+    return true;
   }
 }

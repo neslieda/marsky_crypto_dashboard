@@ -14,12 +14,14 @@ class GetCoinsPaginated {
     required int offset,
     required CoinSortBy orderBy,
     required CoinSortDirection direction,
+    String? search,
   }) {
     return repository.getCoins(
       limit: limit,
       offset: offset,
       orderBy: orderBy,
       orderDirection: direction,
+      search: search,
     );
   }
 }

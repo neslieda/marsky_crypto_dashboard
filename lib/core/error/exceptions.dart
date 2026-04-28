@@ -19,6 +19,11 @@ class AuthException extends AppException {
   const AuthException(super.message);
 }
 
+class EmailConfirmationException extends AppException {
+  const EmailConfirmationException(
+      [super.message = 'Please confirm your email to continue.']);
+}
+
 class CacheException extends AppException {
   const CacheException([super.message = 'Cache error.']);
 }

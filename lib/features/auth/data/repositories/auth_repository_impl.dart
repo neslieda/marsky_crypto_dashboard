@@ -74,4 +74,14 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(mapExceptionToFailure(e));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> resendConfirmation(String email) async {
+    try {
+      await _dataSource.resendConfirmation(email);
+      return const Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
 }

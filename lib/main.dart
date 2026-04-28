@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,7 +14,11 @@ import 'features/favorites/data/models/favorite_coin_hive.dart';
 import 'features/portfolio/data/models/portfolio_holding_hive.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final binding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: binding);
+
+  // Cap image cache to ~50MB to bound memory usage on long sessions.
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 50 * 1024 * 1024;
 
   Bloc.observer = const _AppBlocObserver();
 
@@ -42,6 +47,7 @@ Future<void> main() async {
   }
   await configureDependencies(hiveCachePath: hiveCachePath);
 
+  FlutterNativeSplash.remove();
   runApp(const MarskyApp());
 }
 

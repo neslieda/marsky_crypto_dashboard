@@ -7,6 +7,7 @@ abstract class SupabaseAuthDataSource {
   Future<sb.User> signUp({required String email, required String password});
   Future<void> signOut();
   Future<void> resetPassword(String email);
+  Future<void> resendConfirmation(String email);
   sb.User? get currentUser;
   Stream<sb.AuthState> authStateChanges();
 }
@@ -54,13 +55,28 @@ class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
       final res = await _client.auth.signUp(email: email, password: password);
       final user = res.user;
       if (user == null) {
-        throw const core.AuthException(
-          'Sign-up failed. You may need to confirm your email.',
-        );
+        throw const core.AuthException('Sign-up failed.');
+      }
+      // Supabase returns a user but no session when email confirmation is on.
+      if (res.session == null) {
+        throw const core.EmailConfirmationException();
       }
       return user;
     } on sb.AuthApiException catch (e) {
       throw core.AuthException(e.message);
+    } on sb.AuthException catch (e) {
+      throw core.AuthException(e.message);
+    } on core.EmailConfirmationException {
+      rethrow;
+    } catch (e) {
+      throw core.AuthException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> resendConfirmation(String email) async {
+    try {
+      await _client.auth.resend(type: sb.OtpType.signup, email: email);
     } on sb.AuthException catch (e) {
       throw core.AuthException(e.message);
     } catch (e) {

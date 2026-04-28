@@ -18,6 +18,7 @@ class CoinsRepositoryImpl implements CoinsRepository {
     required int offset,
     required CoinSortBy orderBy,
     required CoinSortDirection orderDirection,
+    String? search,
   }) async {
     try {
       final page = await _remote.getCoins(
@@ -25,6 +26,7 @@ class CoinsRepositoryImpl implements CoinsRepository {
         offset: offset,
         orderBy: orderBy,
         direction: orderDirection,
+        search: search,
       );
       return Right(page);
     } catch (e) {

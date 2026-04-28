@@ -85,6 +85,9 @@ dependencies:
   # Biometric auth
   local_auth: ^2.3.0
 
+  # Native splash (used at runtime in main.dart preserve/remove)
+  flutter_native_splash: ^2.4.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -92,6 +95,29 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   mocktail: ^1.0.4
   bloc_test: ^10.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/branding/app_icon.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#0A0E1E"
+  adaptive_icon_foreground: "assets/branding/app_icon_foreground.png"
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#0A0E1E"
+  image: assets/branding/splash_logo.png
+  color_dark: "#0A0E1E"
+  image_dark: assets/branding/splash_logo.png
+  android_12:
+    color: "#0A0E1E"
+    image: assets/branding/splash_logo.png
+    color_dark: "#0A0E1E"
+    image_dark: assets/branding/splash_logo.png
+  ios: true
+  android: true
 
 flutter:
 
@@ -101,6 +127,7 @@ flutter:
 
   assets:
     - .env
+    - assets/branding/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
