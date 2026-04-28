@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -168,11 +169,11 @@ class _MainShellPageState extends State<MainShellPage> {
 
   @override
   Widget build(BuildContext context) {
-    final pages = const [
-      HomePage(),
-      FavoritesPage(),
-      PortfolioPage(),
-      NewsPage(),
+    final pages = <Widget>[
+      const HomePage(),
+      const FavoritesPage(),
+      const PortfolioPage(),
+      if (!kIsWeb) const NewsPage(),
     ];
     final l = AppLocalizations.of(context);
     return Scaffold(
@@ -220,10 +221,11 @@ class _MainShellPageState extends State<MainShellPage> {
             icon: const Icon(Icons.account_balance_wallet_rounded),
             label: l.portfolio,
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.article_outlined),
-            label: l.news,
-          ),
+          if (!kIsWeb)
+            NavigationDestination(
+              icon: const Icon(Icons.article_outlined),
+              label: l.news,
+            ),
         ],
       ),
     );
