@@ -159,4 +159,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get language => 'Language';
+
+  @override
+  String get portfolio => 'Portfolio';
+
+  @override
+  String get news => 'News';
+
+  @override
+  String get compare => 'Compare';
+
+  @override
+  String get currency => 'Currency';
+
+  @override
+  String get biometric => 'Biometric login';
+
+  @override
+  String get biometricUnavailable =>
+      'Biometric authentication is not available on this device.';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get assignCategory => 'Assign category';
+
+  @override
+  String get categoryHint => 'e.g. DeFi, Layer 1';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get addHolding => 'Add holding';
+
+  @override
+  String get editHolding => 'Edit holding';
+
+  @override
+  String get portfolioEmpty => 'No holdings yet.\nTap + to add one.';
+
+  @override
+  String get totalValue => 'Total value';
+
+  @override
+  String get totalCost => 'Total cost';
+
+  @override
+  String get profitLoss => 'P/L';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get amountRequired => 'Amount is required';
+
+  @override
+  String get amountInvalid => 'Invalid amount';
+
+  @override
+  String get buyPriceOptional => 'Avg buy price (optional)';
+
+  @override
+  String get selectCoin => 'Select coin';
+
+  @override
+  String get coin => 'Coin';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get deleteConfirm => 'Delete this holding?';
+
+  @override
+  String get newsEmpty => 'No news available.';
+
+  @override
+  String get copyLink => 'Link copied';
+
+  @override
+  String get compareHint => 'Pick two coins to compare';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get change24h => '24h change';
 }

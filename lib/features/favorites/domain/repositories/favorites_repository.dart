@@ -12,5 +12,7 @@ abstract class FavoritesRepository {
 
   Future<Either<Failure, bool>> toggle(FavoriteCoin coin);
 
+  Future<Either<Failure, void>> updateCategory(String uuid, String? category);
+
   Future<Either<Failure, void>> close();
 }

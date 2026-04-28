@@ -54,4 +54,15 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
       return Left(mapExceptionToFailure(e));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateCategory(
+      String uuid, String? category) async {
+    try {
+      await _local.updateCategory(uuid, category);
+      return const Right(null);
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
 }

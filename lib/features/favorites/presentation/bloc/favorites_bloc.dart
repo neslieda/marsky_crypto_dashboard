@@ -28,6 +28,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     on<FavoritesRefreshed>(_onRefreshed);
     on<_FavoritesUpdated>(_onUpdated);
     on<FavoritesToggled>(_onToggled);
+    on<FavoritesCategoryChanged>(_onCategoryChanged);
   }
 
   Future<void> _onUserChanged(
@@ -96,6 +97,17 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     Emitter<FavoritesState> emit,
   ) async {
     final result = await toggleFavorite(event.coin);
+    result.fold(
+      (failure) => emit(state.copyWith(errorMessage: failure.message)),
+      (_) {},
+    );
+  }
+
+  Future<void> _onCategoryChanged(
+    FavoritesCategoryChanged event,
+    Emitter<FavoritesState> emit,
+  ) async {
+    final result = await repository.updateCategory(event.uuid, event.category);
     result.fold(
       (failure) => emit(state.copyWith(errorMessage: failure.message)),
       (_) {},

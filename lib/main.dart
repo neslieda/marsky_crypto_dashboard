@@ -10,6 +10,7 @@ import 'app.dart';
 import 'core/config/app_env.dart';
 import 'core/di/injection.dart';
 import 'features/favorites/data/models/favorite_coin_hive.dart';
+import 'features/portfolio/data/models/portfolio_holding_hive.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,9 @@ Future<void> main() async {
   await Hive.initFlutter();
   if (!Hive.isAdapterRegistered(1)) {
     Hive.registerAdapter(FavoriteCoinAdapter());
+  }
+  if (!Hive.isAdapterRegistered(2)) {
+    Hive.registerAdapter(PortfolioHoldingAdapter());
   }
 
   if (AppEnv.supabaseUrl.isNotEmpty && AppEnv.supabaseAnonKey.isNotEmpty) {

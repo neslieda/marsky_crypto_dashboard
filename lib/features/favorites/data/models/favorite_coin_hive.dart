@@ -9,6 +9,7 @@ class FavoriteCoinHive extends FavoriteCoin {
     required super.symbol,
     required super.addedAt,
     super.iconUrl,
+    super.category,
   });
 
   factory FavoriteCoinHive.fromEntity(FavoriteCoin e) => FavoriteCoinHive(
@@ -17,6 +18,7 @@ class FavoriteCoinHive extends FavoriteCoin {
         symbol: e.symbol,
         iconUrl: e.iconUrl,
         addedAt: e.addedAt,
+        category: e.category,
       );
 }
 
@@ -36,13 +38,14 @@ class FavoriteCoinAdapter extends TypeAdapter<FavoriteCoinHive> {
       symbol: fields[2] as String,
       iconUrl: fields[3] as String?,
       addedAt: DateTime.fromMillisecondsSinceEpoch(fields[4] as int),
+      category: fields[5] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, FavoriteCoinHive obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.uuid)
       ..writeByte(1)
@@ -52,6 +55,8 @@ class FavoriteCoinAdapter extends TypeAdapter<FavoriteCoinHive> {
       ..writeByte(3)
       ..write(obj.iconUrl)
       ..writeByte(4)
-      ..write(obj.addedAt.millisecondsSinceEpoch);
+      ..write(obj.addedAt.millisecondsSinceEpoch)
+      ..writeByte(5)
+      ..write(obj.category);
   }
 }

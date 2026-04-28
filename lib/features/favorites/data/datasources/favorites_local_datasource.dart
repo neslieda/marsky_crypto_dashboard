@@ -12,6 +12,7 @@ abstract class FavoritesLocalDataSource {
   List<FavoriteCoinHive> getAll();
   Stream<List<FavoriteCoinHive>> watchAll();
   Future<bool> toggle(FavoriteCoinHive coin);
+  Future<void> updateCategory(String uuid, String? category);
 }
 
 class FavoritesLocalDataSourceImpl implements FavoritesLocalDataSource {
@@ -67,5 +68,21 @@ class FavoritesLocalDataSourceImpl implements FavoritesLocalDataSource {
     }
     await box.put(coin.uuid, coin);
     return true;
+  }
+
+  @override
+  Future<void> updateCategory(String uuid, String? category) async {
+    final box = _requireBox();
+    final existing = box.get(uuid);
+    if (existing == null) return;
+    final updated = FavoriteCoinHive(
+      uuid: existing.uuid,
+      name: existing.name,
+      symbol: existing.symbol,
+      iconUrl: existing.iconUrl,
+      addedAt: existing.addedAt,
+      category: category,
+    );
+    await box.put(uuid, updated);
   }
 }

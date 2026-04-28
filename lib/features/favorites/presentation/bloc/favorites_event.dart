@@ -28,6 +28,14 @@ class FavoritesToggled extends FavoritesEvent {
   List<Object?> get props => [coin];
 }
 
+class FavoritesCategoryChanged extends FavoritesEvent {
+  final String uuid;
+  final String? category;
+  const FavoritesCategoryChanged(this.uuid, this.category);
+  @override
+  List<Object?> get props => [uuid, category];
+}
+
 class _FavoritesUpdated extends FavoritesEvent {
   final List<FavoriteCoin> favorites;
   final String? error;

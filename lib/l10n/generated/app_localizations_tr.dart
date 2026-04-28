@@ -159,4 +159,99 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get language => 'Dil';
+
+  @override
+  String get portfolio => 'Portföy';
+
+  @override
+  String get news => 'Haberler';
+
+  @override
+  String get compare => 'Karşılaştır';
+
+  @override
+  String get currency => 'Para birimi';
+
+  @override
+  String get biometric => 'Biyometrik giriş';
+
+  @override
+  String get biometricUnavailable =>
+      'Bu cihazda biyometrik kimlik doğrulama kullanılamıyor.';
+
+  @override
+  String get all => 'Tümü';
+
+  @override
+  String get assignCategory => 'Kategori ata';
+
+  @override
+  String get categoryHint => 'örn. DeFi, Layer 1';
+
+  @override
+  String get clear => 'Temizle';
+
+  @override
+  String get save => 'Kaydet';
+
+  @override
+  String get addHolding => 'Pozisyon ekle';
+
+  @override
+  String get editHolding => 'Pozisyonu düzenle';
+
+  @override
+  String get portfolioEmpty =>
+      'Henüz pozisyon yok.\nEklemek için + simgesine dokun.';
+
+  @override
+  String get totalValue => 'Toplam değer';
+
+  @override
+  String get totalCost => 'Toplam maliyet';
+
+  @override
+  String get profitLoss => 'K/Z';
+
+  @override
+  String get amount => 'Miktar';
+
+  @override
+  String get amountRequired => 'Miktar gerekli';
+
+  @override
+  String get amountInvalid => 'Geçersiz miktar';
+
+  @override
+  String get buyPriceOptional => 'Ort. alış fiyatı (opsiyonel)';
+
+  @override
+  String get selectCoin => 'Coin seç';
+
+  @override
+  String get coin => 'Coin';
+
+  @override
+  String get edit => 'Düzenle';
+
+  @override
+  String get delete => 'Sil';
+
+  @override
+  String get deleteConfirm => 'Bu pozisyon silinsin mi?';
+
+  @override
+  String get newsEmpty => 'Haber yok.';
+
+  @override
+  String get copyLink => 'Bağlantı kopyalandı';
+
+  @override
+  String get compareHint => 'Karşılaştırmak için iki coin seç';
+
+  @override
+  String get price => 'Fiyat';
+
+  @override
+  String get change24h => '24s değişim';
 }

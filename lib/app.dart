@@ -8,7 +8,10 @@ import 'core/router/app_router.dart';
 import 'core/settings/settings_cubit.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/coins/presentation/bloc/coins_list_bloc.dart';
 import 'features/favorites/presentation/bloc/favorites_bloc.dart';
+import 'features/news/presentation/bloc/news_bloc.dart';
+import 'features/portfolio/presentation/bloc/portfolio_bloc.dart';
 import 'l10n/generated/app_localizations.dart';
 
 class MarskyApp extends StatefulWidget {
@@ -22,6 +25,9 @@ class _MarskyAppState extends State<MarskyApp> {
   late final AuthBloc _authBloc;
   late final FavoritesBloc _favoritesBloc;
   late final SettingsCubit _settingsCubit;
+  late final CoinsListBloc _coinsListBloc;
+  late final PortfolioBloc _portfolioBloc;
+  late final NewsBloc _newsBloc;
   late final AppRouter _appRouter;
 
   @override
@@ -34,6 +40,9 @@ class _MarskyAppState extends State<MarskyApp> {
       toggleFavorite: sl(),
     );
     _settingsCubit = sl<SettingsCubit>();
+    _coinsListBloc = sl<CoinsListBloc>()..add(const CoinsListLoadRequested());
+    _portfolioBloc = sl<PortfolioBloc>();
+    _newsBloc = sl<NewsBloc>()..add(const NewsLoadRequested());
     _appRouter = AppRouter(_authBloc);
   }
 
@@ -41,6 +50,9 @@ class _MarskyAppState extends State<MarskyApp> {
   void dispose() {
     _authBloc.close();
     _favoritesBloc.close();
+    _coinsListBloc.close();
+    _portfolioBloc.close();
+    _newsBloc.close();
     super.dispose();
   }
 
@@ -51,14 +63,19 @@ class _MarskyAppState extends State<MarskyApp> {
         BlocProvider.value(value: _authBloc),
         BlocProvider.value(value: _favoritesBloc),
         BlocProvider.value(value: _settingsCubit),
+        BlocProvider.value(value: _coinsListBloc),
+        BlocProvider.value(value: _portfolioBloc),
+        BlocProvider.value(value: _newsBloc),
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listenWhen: (p, c) => p.user?.id != c.user?.id,
         listener: (context, state) {
           if (state.isAuthenticated) {
             _favoritesBloc.add(FavoritesUserChanged(state.user!.id));
+            _portfolioBloc.add(PortfolioOpened(state.user!.id));
           } else {
             _favoritesBloc.add(const FavoritesUserCleared());
+            _portfolioBloc.add(const PortfolioClosed());
           }
         },
         child: BlocBuilder<SettingsCubit, SettingsState>(

@@ -5,6 +5,7 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/coins/presentation/pages/compare_page.dart';
 import '../../features/shell/presentation/pages/main_shell_page.dart';
 
 class AppRouter {
@@ -43,6 +44,10 @@ class AppRouter {
       GoRoute(
         path: '/forgot-password',
         builder: (_, __) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: '/compare',
+        builder: (_, __) => const ComparePage(),
       ),
     ],
   );

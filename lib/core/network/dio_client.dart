@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../config/app_env.dart';
+import 'currency_interceptor.dart';
 import 'dio_interceptors.dart';
 
 class DioClient {
@@ -20,6 +21,7 @@ class DioClient {
         },
       ),
     );
+    dio.interceptors.add(CurrencyInterceptor());
     if (cacheInterceptor != null) {
       dio.interceptors.add(cacheInterceptor);
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/widgets/coin_tile_skeleton.dart';
@@ -19,9 +20,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => CoinsListBloc(getCoinsPaginated: sl())
-        ..add(const CoinsListLoadRequested()),
+    return BlocProvider.value(
+      value: sl<CoinsListBloc>(),
       child: const _HomeView(),
     );
   }
@@ -173,6 +173,12 @@ class _HomeViewState extends State<_HomeView> {
           appBar: AppBar(
             title: Text(l.coins),
             actions: [
+              IconButton(
+                onPressed: () =>
+                    GoRouter.of(context).push('/compare'),
+                icon: const Icon(Icons.compare_arrows_rounded),
+                tooltip: l.compare,
+              ),
               IconButton(
                 onPressed: () => _openSort(context),
                 icon: const Icon(Icons.sort),
