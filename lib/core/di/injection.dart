@@ -38,6 +38,11 @@ import '../../features/portfolio/data/datasources/portfolio_local_datasource.dar
 import '../../features/portfolio/data/repositories/portfolio_repository_impl.dart';
 import '../../features/portfolio/domain/repositories/portfolio_repository.dart';
 import '../../features/portfolio/presentation/bloc/portfolio_bloc.dart';
+import '../../features/strategy/data/datasources/strategy_local_datasource.dart';
+import '../../features/strategy/data/repositories/strategy_repository_impl.dart';
+import '../../features/strategy/domain/repositories/strategy_repository.dart';
+import '../../features/strategy/presentation/cubit/strategy_cubit.dart';
+import '../../features/strategy/presentation/cubit/strategy_signal_cubit.dart';
 import '../../features/ai/data/datasources/openai_datasource.dart';
 import '../../features/ai/data/repositories/ai_repository_impl.dart';
 import '../../features/ai/domain/repositories/ai_repository.dart';
@@ -133,4 +138,14 @@ Future<void> configureDependencies({String? hiveCachePath}) async {
   sl.registerLazySingleton<OpenAiDataSource>(() => OpenAiDataSourceImpl());
   sl.registerLazySingleton<AiRepository>(() => AiRepositoryImpl(sl()));
   sl.registerFactory(() => AiCubit(sl()));
+
+  // ---------------- Strategy ----------------
+  sl.registerLazySingleton<StrategyLocalDataSource>(
+    () => StrategyLocalDataSourceImpl(),
+  );
+  sl.registerLazySingleton<StrategyRepository>(
+    () => StrategyRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<StrategyCubit>(() => StrategyCubit(sl()));
+  sl.registerFactory<StrategySignalCubit>(() => StrategySignalCubit(sl()));
 }

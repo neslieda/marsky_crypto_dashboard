@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/error_mapper.dart';
@@ -6,6 +8,8 @@ import '../../../coins/domain/entities/coin.dart';
 import '../../../coins/domain/entities/coin_detail.dart';
 import '../../../news/domain/entities/news_item.dart';
 import '../../../portfolio/domain/entities/portfolio_holding.dart';
+import '../../../strategy/domain/entities/strategy_signal.dart';
+import '../../../strategy/domain/entities/trading_strategy.dart';
 import '../../domain/entities/ai_insight.dart';
 import '../../domain/repositories/ai_repository.dart';
 import '../datasources/openai_datasource.dart';
@@ -181,6 +185,105 @@ Reply in ${_lang(languageCode)}.''';
         maxTokens: 700,
       );
       return Right(AiInsight(content: out, generatedAt: DateTime.now()));
+    } catch (e) {
+      return Left(mapExceptionToFailure(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, StrategySignal>> evaluateStrategy({
+    required TradingStrategy strategy,
+    required CoinDetail coin,
+    required List<CoinHistoryPoint> history,
+    double? currentHoldingAmount,
+    double? averageBuyPrice,
+    double? totalPortfolioValue,
+    required String languageCode,
+  }) async {
+    try {
+      final prices = history
+          .map((h) => h.price)
+          .whereType<double>()
+          .toList(growable: false);
+      final first = prices.isNotEmpty ? prices.first : null;
+      final last = prices.isNotEmpty ? prices.last : null;
+      final pct = (first != null && last != null && first != 0)
+          ? ((last - first) / first) * 100
+          : null;
+      final hi = prices.isEmpty ? null : prices.reduce((a, b) => a > b ? a : b);
+      final lo = prices.isEmpty ? null : prices.reduce((a, b) => a < b ? a : b);
+
+      final allocationPct = (currentHoldingAmount != null &&
+              coin.coin.price != null &&
+              totalPortfolioValue != null &&
+              totalPortfolioValue > 0)
+          ? (currentHoldingAmount * coin.coin.price! / totalPortfolioValue) *
+              100
+          : null;
+
+      final pnlPct = (averageBuyPrice != null &&
+              averageBuyPrice > 0 &&
+              coin.coin.price != null)
+          ? ((coin.coin.price! - averageBuyPrice) / averageBuyPrice) * 100
+          : null;
+
+      final sys = '''
+You are a disciplined crypto trading assistant. The user has a personal trading
+strategy. Your task: evaluate ONE coin against that strategy and produce a
+structured trading signal. Be objective. Do NOT give blanket financial advice.
+Respond ONLY in valid JSON with this exact schema:
+{
+  "action": "buy" | "sell" | "hold" | "avoid",
+  "confidence": <integer 0-100>,
+  "reasoning": "<2-4 sentence rationale in ${_lang(languageCode)} referencing the strategy>",
+  "suggestedEntry": <number or null>,
+  "suggestedExit": <number or null>,
+  "suggestedAllocationPct": <number or null>
+}
+Respect strategy.maxAllocationPerCoinPct. If the strategy disallows the coin
+(notes mention it explicitly), action must be "avoid".
+''';
+
+      final user = '''
+User strategy:
+- Name: ${strategy.name}
+- Style: ${strategy.style.name}
+- Horizon: ${strategy.horizon.name}
+- Max allocation per coin: ${strategy.maxAllocationPerCoinPct}%
+- Stop loss %: ${strategy.stopLossPct}
+- Take profit %: ${strategy.takeProfitPct}
+- Buy conditions: ${strategy.buyConditions}
+- Sell conditions: ${strategy.sellConditions}
+- Notes / avoidances: ${strategy.notes}
+
+Coin to evaluate:
+- Name: ${coin.coin.name} (${coin.coin.symbol})
+- Rank: ${coin.coin.rank}
+- Price: ${coin.coin.price}
+- 24h change %: ${coin.coin.change}
+- Market cap: ${coin.coin.marketCap}
+- 24h volume: ${coin.coin.volume24h}
+- All time high: ${coin.allTimeHigh}
+- History points: ${history.length}
+- Period change %: ${pct?.toStringAsFixed(2)}
+- Period high: $hi
+- Period low: $lo
+
+User position:
+- Currently holding amount: ${currentHoldingAmount ?? 0}
+- Average buy price: $averageBuyPrice
+- Unrealised P/L %: ${pnlPct?.toStringAsFixed(2)}
+- Current allocation %: ${allocationPct?.toStringAsFixed(2)}
+- Total portfolio value: $totalPortfolioValue
+''';
+
+      final raw = await _client.completeJson(
+        systemPrompt: sys,
+        userPrompt: user,
+        maxTokens: 500,
+      );
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      return Right(StrategySignal.fromJson(json));
     } catch (e) {
       return Left(mapExceptionToFailure(e));
     }

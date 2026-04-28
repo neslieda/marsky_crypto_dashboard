@@ -9,6 +9,9 @@ import '../../../../core/widgets/error_view.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../ai/presentation/cubit/ai_cubit.dart';
 import '../../../ai/presentation/widgets/ai_insight_card.dart';
+import '../../../strategy/presentation/cubit/strategy_cubit.dart';
+import '../../../strategy/presentation/cubit/strategy_signal_cubit.dart';
+import '../../../strategy/presentation/widgets/strategy_signal_card.dart';
 import '../../domain/entities/coin_sort.dart';
 import '../bloc/coin_detail_bloc.dart';
 import 'price_line_chart.dart';
@@ -38,6 +41,7 @@ class CoinDetailSheet extends StatelessWidget {
           )..add(CoinDetailOpened(uuid)),
         ),
         BlocProvider(create: (_) => sl<AiCubit>()),
+        BlocProvider(create: (_) => sl<StrategySignalCubit>()),
       ],
       child: const _CoinDetailSheetView(),
     );
@@ -206,6 +210,27 @@ class _CoinDetailSheetView extends StatelessWidget {
                         ),
                   );
                 }),
+                BlocBuilder<StrategyCubit, StrategyState>(
+                  builder: (ctx, sState) {
+                    final active = sState.active;
+                    if (active == null) return const SizedBox.shrink();
+                    final lang = Localizations.localeOf(ctx).languageCode;
+                    return StrategySignalCard(
+                      title: lang == 'tr'
+                          ? 'Stratejine gore: ${active.name}'
+                          : 'Per your strategy: ${active.name}',
+                      generateLabel:
+                          lang == 'tr' ? 'Sinyal al' : 'Get signal',
+                      onGenerate: () =>
+                          ctx.read<StrategySignalCubit>().evaluate(
+                                strategy: active,
+                                coin: detail,
+                                history: state.history,
+                                languageCode: lang,
+                              ),
+                    );
+                  },
+                ),
                 if (detail.allTimeHigh != null) ...[
                   const SizedBox(height: 12),
                   _StatTile(

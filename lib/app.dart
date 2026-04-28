@@ -12,6 +12,7 @@ import 'features/coins/presentation/bloc/coins_list_bloc.dart';
 import 'features/favorites/presentation/bloc/favorites_bloc.dart';
 import 'features/news/presentation/bloc/news_bloc.dart';
 import 'features/portfolio/presentation/bloc/portfolio_bloc.dart';
+import 'features/strategy/presentation/cubit/strategy_cubit.dart';
 import 'l10n/generated/app_localizations.dart';
 
 class MarskyApp extends StatefulWidget {
@@ -28,6 +29,7 @@ class _MarskyAppState extends State<MarskyApp> {
   late final CoinsListBloc _coinsListBloc;
   late final PortfolioBloc _portfolioBloc;
   late final NewsBloc _newsBloc;
+  late final StrategyCubit _strategyCubit;
   late final AppRouter _appRouter;
 
   @override
@@ -43,6 +45,7 @@ class _MarskyAppState extends State<MarskyApp> {
     _coinsListBloc = sl<CoinsListBloc>()..add(const CoinsListLoadRequested());
     _portfolioBloc = sl<PortfolioBloc>();
     _newsBloc = sl<NewsBloc>()..add(const NewsLoadRequested());
+    _strategyCubit = sl<StrategyCubit>();
     _appRouter = AppRouter(_authBloc);
   }
 
@@ -53,6 +56,7 @@ class _MarskyAppState extends State<MarskyApp> {
     _coinsListBloc.close();
     _portfolioBloc.close();
     _newsBloc.close();
+    _strategyCubit.close();
     super.dispose();
   }
 
@@ -66,6 +70,7 @@ class _MarskyAppState extends State<MarskyApp> {
         BlocProvider.value(value: _coinsListBloc),
         BlocProvider.value(value: _portfolioBloc),
         BlocProvider.value(value: _newsBloc),
+        BlocProvider.value(value: _strategyCubit),
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listenWhen: (p, c) => p.user?.id != c.user?.id,
@@ -73,6 +78,7 @@ class _MarskyAppState extends State<MarskyApp> {
           if (state.isAuthenticated) {
             _favoritesBloc.add(FavoritesUserChanged(state.user!.id));
             _portfolioBloc.add(PortfolioOpened(state.user!.id));
+            _strategyCubit.bootstrap(state.user!.id);
           } else {
             _favoritesBloc.add(const FavoritesUserCleared());
             _portfolioBloc.add(const PortfolioClosed());

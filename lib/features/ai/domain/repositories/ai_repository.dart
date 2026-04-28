@@ -5,6 +5,8 @@ import '../../../coins/domain/entities/coin.dart';
 import '../../../coins/domain/entities/coin_detail.dart';
 import '../../../news/domain/entities/news_item.dart';
 import '../../../portfolio/domain/entities/portfolio_holding.dart';
+import '../../../strategy/domain/entities/strategy_signal.dart';
+import '../../../strategy/domain/entities/trading_strategy.dart';
 import '../entities/ai_insight.dart';
 
 abstract class AiRepository {
@@ -22,6 +24,18 @@ abstract class AiRepository {
 
   Future<Either<Failure, AiInsight>> summarizeNews({
     required List<NewsItem> items,
+    required String languageCode,
+  });
+
+  /// Evaluate a single coin against the user's [strategy]. Returns a
+  /// structured signal (BUY/SELL/HOLD/AVOID + confidence + reasoning).
+  Future<Either<Failure, StrategySignal>> evaluateStrategy({
+    required TradingStrategy strategy,
+    required CoinDetail coin,
+    required List<CoinHistoryPoint> history,
+    double? currentHoldingAmount,
+    double? averageBuyPrice,
+    double? totalPortfolioValue,
     required String languageCode,
   });
 }

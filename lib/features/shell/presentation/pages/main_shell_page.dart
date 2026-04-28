@@ -13,6 +13,8 @@ import '../../../coins/presentation/pages/home_page.dart';
 import '../../../favorites/presentation/pages/favorites_page.dart';
 import '../../../news/presentation/pages/news_page.dart';
 import '../../../portfolio/presentation/pages/portfolio_page.dart';
+import '../../../strategy/presentation/cubit/strategy_cubit.dart';
+import '../../../strategy/presentation/pages/strategy_list_page.dart';
 
 class MainShellPage extends StatefulWidget {
   const MainShellPage({super.key});
@@ -184,6 +186,22 @@ class _MainShellPageState extends State<MainShellPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  IconButton.filledTonal(
+                    icon: const Icon(Icons.flag_outlined),
+                    tooltip: 'Strategies',
+                    onPressed: () {
+                      final cubit = context.read<StrategyCubit>();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider.value(
+                            value: cubit,
+                            child: const StrategyListPage(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
                   IconButton.filledTonal(
                     icon: const Icon(Icons.settings_outlined),
                     onPressed: () => _openSettings(context),
